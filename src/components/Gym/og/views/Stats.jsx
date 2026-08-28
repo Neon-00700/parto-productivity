@@ -2,9 +2,87 @@ import React, { useMemo } from 'react';
 import Card from '../../../Common/Card';
 import EmptyState from '../../../Common/EmptyState';
 import { gymT } from '../lib/i18n';
-import { workoutVolume, setsDone, streakWeeks, weekKey, bestSetOf, estimate1RM } from '../lib/calc';
-import { exOr } from '../lib/exercises';
+import { workoutVolume, setsDone, streakWeeks, weekKey, bestSetOf, estimate1RM, isoOf } from '../lib/calc';
+import { exOr, EXIDX } from '../lib/exercises';
 import { localizeDigits, fmtShort } from '../../../../utils/dateUtils';
+
+// GitHub-style year heatmap of training days (workouts per day → intensity).
+export function Heatmap({ workouts, lang }) {
+  const grid = useMemo(() => {
+    const col = new Map();
+    workouts.forEach((w) => col.set(w.d, (col.get(w.d) || 0) + 1));
+    const today = new Date();
+    const start = new Date(today); start.setDate(today.getDate() - ((today.getDay() + 6) % 7) - (25 * 7));
+    const weeks = [];
+    const cur = new Date(start);
+    for (let w = 0; w < 26; w++) {
+      const colCells = [];
+      for (let d = 0; d < 7; d++) {
+        const iso = isoOf(cur);
+        const n = col.get(iso) || 0;
+        colCells.push({ iso, n, week: w, day: d });
+        cur.setDate(cur.getDate() + 1);
+      }
+      weeks.push(colCells);
+    }
+    return weeks;
+  }, [workouts]);
+
+  const cellColor = (n) => {
+    if (n === 0) return 'transparent';
+    const levels = ['rgb(var(--c-primary) / 0.18)', 'rgb(var(--c-primary) / 0.35)', 'rgb(var(--c-primary) / 0.55)', 'rgb(var(--c-primary) / 0.8)', 'rgb(var(--c-primary))'];
+    return levels[Math.min(n - 1, levels.length - 1)];
+  };
+
+  return (
+    <div className="flex gap-1 overflow-x-auto pb-1" style={{ direction: 'ltr' }}>
+      {grid.map((week, wi) => (
+        <div key={wi} className="flex flex-col gap-1">
+          {week.map((c) => (
+            <div
+              key={c.iso}
+              title={`${c.iso} · ${localizeDigits(c.n, lang)}`}
+              className="h-2.5 w-2.5 rounded-[3px] border border-slate-200 dark:border-slate-800"
+              style={{ background: cellColor(c.n) }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Muscle balance — how much each target muscle got trained over all workouts.
+export function MuscleBalance({ workouts, lang }) {
+  const rows = useMemo(() => {
+    const acc = {};
+    let total = 0;
+    workouts.forEach((w) => w.entries.forEach((e) => {
+      const ex = e.id ? EXIDX[e.id] : null;
+      const tg = ex?.tg || 'misc';
+      const sets = e.sets.filter((s) => s.done).length;
+      if (!sets) return;
+      acc[tg] = (acc[tg] || 0) + sets;
+      total += sets;
+    }));
+    return Object.entries(acc).map(([k, v]) => ({ k, v })).sort((a, b) => b.v - a.v).map((r) => ({ ...r, pct: total ? Math.round((r.v / total) * 100) : 0 }));
+  }, [workouts]);
+
+  if (!rows.length) return <EmptyState message={gymT(lang, 'empty')} icon={<span className="text-3xl">💪</span>} />;
+  return (
+    <div className="space-y-2">
+      {rows.map((r) => (
+        <div key={r.k} className="flex items-center gap-2">
+          <span className="text-xs text-slate-500 w-24 shrink-0 truncate">{r.k}</span>
+          <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: `${r.pct}%`, background: 'rgb(var(--c-primary))' }} />
+          </div>
+          <span className="text-xs text-slate-400 w-10 text-end tabular-nums">{localizeDigits(r.pct, lang)}٪</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Stats({ api }) {
   const { S, lang } = api;
@@ -41,6 +119,16 @@ export default function Stats({ api }) {
         <CardStat label={gymT(lang, 'streakLabel')} value={localizeDigits(streak, lang)} icon="🔥" />
         <CardStat label={gymT(lang, 'totalVolume')} value={localizeDigits(totalVolume, lang)} icon="📊" />
       </div>
+
+      <Card className="!p-4">
+        <h3 className="font-bold text-sm mb-2">🟩 {gymT(lang, 'heatmap')}</h3>
+        <Heatmap workouts={S.workouts} lang={lang} />
+      </Card>
+
+      <Card className="!p-4">
+        <h3 className="font-bold text-sm mb-2">💪 {gymT(lang, 'muscleMap')}</h3>
+        <MuscleBalance workouts={S.workouts} lang={lang} />
+      </Card>
 
       <Card className="!p-4">
         <h3 className="font-bold text-sm mb-2">🏆 {gymT(lang, 'prs')}</h3>

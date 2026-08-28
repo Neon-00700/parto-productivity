@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { FiPlay, FiPlus, FiMinus, FiX, FiCheck, FiChevronLeft, FiChevronRight, FiShuffle } from 'react-icons/fi';
+import { FiPlay, FiPlus, FiMinus, FiX, FiCheck, FiChevronLeft, FiChevronRight, FiShuffle, FiInfo } from 'react-icons/fi';
 import Card from '../../../Common/Card';
 import Button from '../../../Common/Button';
 import EmptyState from '../../../Common/EmptyState';
@@ -8,10 +8,17 @@ import Stepper from '../components/Stepper';
 import RestTimer from '../components/RestTimer';
 import ExercisePicker from '../components/ExercisePicker';
 import { gymT } from '../lib/i18n';
-import { effectiveRoutine, todayISO, modeOf, isBw, isPerSide, supersetUnits, unitOf, setsDoneActive, bestWeightFor, lastEntryFor, estimate1RM } from '../lib/calc';
+import { effectiveRoutine, todayISO, modeOf, isBw, isPerSide, supersetUnits, setsDoneActive, bestWeightFor, lastEntryFor } from '../lib/calc';
 import { exOr } from '../lib/exercises';
-import { startFlow, finishWorkout, discardWorkout, setField, addSet, removeSet, setActiveCur } from '../lib/session';
+import { startFlow, finishWorkout, discardWorkout, setField, addSet, removeSet, setActiveCur, confirmWorkingWeight } from '../lib/session';
 import { localizeDigits } from '../../../../utils/dateUtils';
+
+// Effort scale meta (RIR / RPE). Optional third column.
+const EFFORT = {
+  rir: { f: 'rir', hd: 'RIR', step: 0.5, min: 0, max: 10 },
+  rpe: { f: 'rpe', hd: 'RPE', step: 0.5, min: 6, max: 10 },
+};
+const effortOf = (S) => { const e = S.effort; return e === 'none' || !EFFORT[e] ? null : e; };
 
 function Elapsed({ start }) {
   const [, tick] = useState(0);
@@ -70,10 +77,28 @@ function StartChooser({ api }) {
   );
 }
 
+// Counts down a timed set and checks it off once the target is reached.
+function WorkTimer({ sec, onDone }) {
+  const [left, setLeft] = useState(sec);
+  useEffect(() => {
+    if (left <= 0) { onDone(); return; }
+    const iv = setInterval(() => setLeft((v) => v - 1), 1000);
+    return () => clearInterval(iv);
+  }, [left]);
+  const mm = String(Math.floor(left / 60)).padStart(2, '0');
+  const ss = String(left % 60).padStart(2, '0');
+  return <span className="text-[11px] font-bold tabular-nums" dir="ltr" style={{ color: 'rgb(var(--c-primary))' }}>{mm}:{ss}</span>;
+}
+
 function ExerciseBlock({ api, entryIdx, compact = false, onRest }) {
   const { S, update, lang } = api;
-  const A = S.active;
-  const entry = A.entries[entryIdx];
+  const entry = S.active.entries[entryIdx];
+  const [running, setRunning] = useState(-1);
+  const startTimed = (i) => {
+    const t = entry.sets[i].sec || 30;
+    setRunning(i);
+    setField(api, entryIdx, i, 'sec', t);
+  };
   const ex = exOr(entry.id);
   const mode = modeOf(entry.target);
   const cardio = mode === 'cardio';
@@ -83,46 +108,113 @@ function ExerciseBlock({ api, entryIdx, compact = false, onRest }) {
   const added = bw && entry.sets.some((s) => s.w > 0);
   const best = cardio ? 0 : Math.max(bestWeightFor(S, entry.id), (S.exWeights?.[entry.id] || {}).w || 0);
   const last = lastEntryFor(S, entry.id);
+  const kind = effortOf(S);
+  const eff = EFFORT[kind] || null;
 
   const col1 = cardio ? 'min' : timed ? 'sec' : 'w';
   const col1Label = cardio ? gymT(lang, 'durationMin') : timed ? gymT(lang, 'seconds') : gymT(lang, 'weight');
   const col2 = cardio ? 'speed' : timed ? (bw && !added ? null : 'w') : 'r';
   const col2Label = cardio ? gymT(lang, 'speed') : timed ? (bw && !added ? null : gymT(lang, 'weight')) : gymT(lang, 'reps');
+  const effF = eff && mode === 'reps' ? eff.f : null;
 
-  const setLeft = (s) => (added ? Math.max(0, s.w) : s.w);
-  const setRight = (s) => (cardio ? s.speed : timed ? (bw && !added ? null : s.w) : s.r);
+  // Progression reason ("why this number?").
+  const plan = entry.plan;
+  const why = plan?.why ? gymT(lang, plan.why[0], ...plan.why.slice(1)) : null;
+
+  const bump = (i, col, dir, meta) => {
+    const cur = entry.sets[i][col];
+    if (meta) {
+      // effort: step on its own scale; empty is not 0
+      if (cur == null) return setField(api, entryIdx, i, col, dir < 0 ? null : meta.min);
+      let n = Math.round((cur + dir * meta.step) * 100) / 100;
+      if (dir < 0 && n < meta.min) return setField(api, entryIdx, i, col, null);
+      n = dir > 0 ? Math.min(meta.max, n) : Math.max(meta.min, n);
+      return setField(api, entryIdx, i, col, n);
+    }
+    const step = cardio ? (col === 'speed' ? 0.5 : 1) : timed ? 5 : (col === 'r' ? (isPerSide(cfg) ? 2 : 1) : 2.5);
+    const dec = col === 'speed';
+    const n = Math.max(0, Math.round(((cur || 0) + dir * step) * (dec ? 100 : 1)) / (dec ? 100 : 1));
+    setField(api, entryIdx, i, col, n);
+  };
+  const typeEff = (i, col, v) => { const n = Number(v); if (!isFinite(n)) return setField(api, entryIdx, i, col, null); setField(api, entryIdx, i, col, Math.min(EFFORT[kind].max, Math.max(0, n))); };
+
+  const cell = (i, col, meta) => (
+    <div className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800/70 p-0.5">
+      <button type="button" onClick={() => bump(i, col, -1, meta)} className="h-7 w-7 grid place-items-center rounded-md text-slate-400 hover:text-primary"><FiMinus size={12} /></button>
+      <input
+        className="bg-transparent text-center font-bold tabular-nums outline-none text-slate-800 dark:text-slate-100 w-11 text-sm"
+        inputMode="decimal"
+        value={entry.sets[i][col] == null ? '' : localizeDigits(entry.sets[i][col], lang)}
+        onChange={(e) => {
+          if (meta) return typeEff(i, col, e.target.value);
+          if (e.target.value === '') return setField(api, entryIdx, i, col, 0);
+          const n = Number(e.target.value); if (isFinite(n)) setField(api, entryIdx, i, col, Math.max(0, n));
+        }}
+      />
+      <button type="button" onClick={() => bump(i, col, 1, meta)} className="h-7 w-7 grid place-items-center rounded-md text-slate-400 hover:text-primary"><FiPlus size={12} /></button>
+    </div>
+  );
+
+  const toggle = (i) => {
+    update((st) => {
+      st.active.entries[entryIdx].sets[i].done = !st.active.entries[entryIdx].sets[i].done;
+    });
+    const now = !entry.sets[i].done;
+    const allDone = entry.sets.map((x, xi) => (xi === i ? now : x.done)).every(Boolean);
+    if (allDone) {
+      confirmWorkingWeight(api, entryIdx);
+      onRest?.();
+    }
+  };
 
   return (
     <Card className="!p-4">
       <div className="flex items-center justify-between mb-2">
         <p className={`font-bold ${compact ? 'text-base' : 'text-lg'} capitalize`}>{ex.n}</p>
+        <FiInfo className="text-slate-300" size={15} />
       </div>
       <div className="flex flex-wrap gap-1.5 text-[11px] text-slate-400 mb-2">
-        {ex.tg && <span className="chip">{lang === 'fa' ? ex.tg : ex.tg}</span>}
+        {ex.tg && <span className="chip">{ex.tg}</span>}
         {ex.eq && <span className="chip">{ex.eq}</span>}
         {best > 0 && <span className="chip">{gymT(lang, 'best')} {localizeDigits(best, lang)} {S.unit}</span>}
         {isPerSide(cfg) && <span className="chip">{gymT(lang, 'perSide', localizeDigits((entry.sets[0]?.r || 0) / 2, lang))}</span>}
+        {cardio && <span className="chip">🏃 {gymT(lang, 'cardio')}</span>}
       </div>
       {last && (
         <p className="text-[11px] text-slate-400 mb-2">
           {gymT(lang, 'lastTime')}: {last.sets.map((s) => `${localizeDigits(s.w || 0, lang)}×${localizeDigits(s.r || 0, lang)}`).join(', ')}
         </p>
       )}
+      {why && (
+        <p className="text-[11px] rounded-lg px-2.5 py-1.5 mb-2" style={{ background: plan.kind === 'deload' ? 'rgb(239 68 68 / 0.12)' : 'rgb(var(--c-primary) / 0.10)', color: plan.kind === 'deload' ? '#ef4444' : 'rgb(var(--c-primary))' }}>
+          {plan.kind === 'up' ? '▲ ' : plan.kind === 'deload' ? '▼ ' : '• '}{why}
+        </p>
+      )}
 
       <div className="space-y-1.5">
         {entry.sets.map((s, i) => (
-          <div key={i} className="flex items-center gap-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5">
+          <div key={i} className="flex items-center gap-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5 flex-wrap">
             <span className="w-5 text-center text-xs font-bold text-slate-400">{localizeDigits(i + 1, lang)}</span>
-            <Stepper small lang={lang} value={s[col1]} onChange={(v) => setField(api, entryIdx, i, col1, v)} step={cardio ? 1 : 2.5} decimal min={0} />
-            {col2 && !cardio && <Stepper small lang={lang} value={s[col2]} onChange={(v) => setField(api, entryIdx, i, col2, v)} step={isPerSide(cfg) ? 2 : 1} min={0} />}
-            {cardio && <Stepper small lang={lang} value={s.speed} onChange={(v) => setField(api, entryIdx, i, 'speed', v)} step={0.5} decimal min={0} />}
-            <span className="text-[11px] text-slate-400 w-10 text-end">{col1Label}</span>
+            {cell(i, col1)}
+            {col2 && cell(i, col2)}
+            {effF && cell(i, effF, EFFORT[kind])}
+            <span className="text-[10px] text-slate-400 w-14 text-end">{col1Label}</span>
+            {timed && running === i && !entry.sets[i].done && (
+              <WorkTimer sec={entry.sets[i].sec || 30} onDone={() => { setRunning(-1); toggle(i); }} />
+            )}
+            {timed && running !== i && !entry.sets[i].done && (
+              <button
+                type="button"
+                onClick={() => startTimed(i)}
+                className="h-7 w-7 rounded-lg grid place-items-center border border-primary/40 text-primary hover:bg-primary/10"
+                style={{ color: 'rgb(var(--c-primary))' }}
+                aria-label="Start set"
+              >
+                <FiPlay size={12} />
+              </button>
+            )}
             <button
-              onClick={() => {
-                update((st) => { st.active.entries[entryIdx].sets[i].done = !st.active.entries[entryIdx].sets[i].done; });
-                const allDone = entry.sets.every((x, xi) => (xi === i ? !entry.sets[i].done : x.done));
-                if (allDone) onRest?.();
-              }}
+              onClick={() => { setRunning(-1); toggle(i); }}
               className={`ml-auto h-7 w-7 shrink-0 rounded-lg grid place-items-center border-2 ${
                 s.done ? 'border-transparent text-white' : 'border-slate-300 dark:border-slate-600 text-transparent'
               }`}
@@ -141,6 +233,7 @@ function ExerciseBlock({ api, entryIdx, compact = false, onRest }) {
         <Button variant="soft" className="!py-1.5 !text-xs" onClick={() => addSet(api, entryIdx)}>
           <FiPlus size={13} /> {gymT(lang, 'addSet')}
         </Button>
+        {eff && !cardio && !timed && <Button variant="ghost" className="!py-1.5 !text-xs" disabled onClick={() => {}}>{EFFORT[kind].hd}</Button>}
       </div>
     </Card>
   );
@@ -193,7 +286,7 @@ function ActiveWorkout({ api }) {
               : gymT(lang, 'exercise#', localizeDigits(unitIdx + 1, lang), localizeDigits(units.length, lang))}
           </p>
           {units[unitIdx].map((idx) => (
-            <ExerciseBlock key={idx} api={api} entryIdx={idx} compact={isSuperset} onRest={() => setRestTrigger(Date.now())} />
+            <ExerciseBlock key={idx} api={api} entryIdx={idx} compact={isSuperset} onRest={() => { setRestTrigger(Date.now()); }} />
           ))}
         </div>
       )}
@@ -218,7 +311,8 @@ function AddExerciseInWorkout({ api }) {
   const add = (exId) => {
     update((s) => {
       const cfg = { id: exId, sets: 3, reps: 10, weight: 0, mode: 'reps' };
-      s.active.entries.push({ id: exId, target: cfg, sets: cfg.sets ? Array.from({ length: cfg.sets }, () => ({ w: 0, r: cfg.reps, done: false })) : [], plan: null });
+      const plan = { kind: 'first', why: ['prog.first'], policy: 'linear' };
+      s.active.entries.push({ id: exId, target: cfg, sets: Array.from({ length: cfg.sets }, () => ({ w: 0, r: cfg.reps, done: false })), plan });
       s.active.cur = s.active.entries.length - 1;
     });
   };

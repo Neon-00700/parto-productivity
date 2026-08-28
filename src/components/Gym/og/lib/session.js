@@ -1,5 +1,6 @@
 // Session lifecycle for a workout. `api` = { S, update, set, lang }.
 import { buildSets, todayISO, setsDoneActive } from './calc.js';
+import { nextPrescription, applyPrescription, policyFor } from './progression.js';
 import { uid } from './util.js';
 import { gymT } from './i18n.js';
 
@@ -8,12 +9,15 @@ export function startFlow(api, routineId) {
   update((s) => {
     const routine = s.routines.find((r) => r.id === routineId) || null;
     const entries = routine
-      ? routine.ex.map((cfg) => ({
-          id: cfg.id,
-          target: { ...cfg },
-          sets: buildSets(s, { ...cfg, id: cfg.id }),
-          plan: null,
-        }))
+      ? routine.ex.map((cfg) => {
+          const plan = nextPrescription(s, { ...cfg }, routine);
+          return {
+            id: cfg.id,
+            target: { ...cfg },
+            sets: applyPrescription(buildSets(s, { ...cfg, id: cfg.id }), plan),
+            plan,
+          };
+        })
       : [];
     s.active = {
       id: uid(),
@@ -24,6 +28,24 @@ export function startFlow(api, routineId) {
       entries,
     };
   });
+}
+
+// Confirm the working weight an exercise "earned" this session and store it for the next
+// session's pre-fill. Called when an exercise's sets are all complete.
+export function confirmWorkingWeight(api, entryIdx) {
+  const { update } = api;
+  let w = 0;
+  update((s) => {
+    const e = s.active?.entries?.[entryIdx];
+    if (!e) return;
+    const done = e.sets.filter((x) => x.done);
+    const best = Math.max(0, ...done.map((x) => Number(x.w) || 0));
+    w = best;
+    if (e.id) s.exWeights = s.exWeights || {};
+    s.exWeights[e.id] = { w: best };
+    e.topW = best;
+  });
+  return w;
 }
 
 // Save the active session into history and clear it. Returns the saved record.

@@ -39,6 +39,8 @@ function DayAssignSheet({ lang, day, routines, week, onPick, onClose }) {
   );
 }
 
+const PROG_OPTS = ['off', 'linear', 'greyskull', 'double', 'time'];
+
 function RoutineEditor({ api, routine }) {
   const { update, lang, setRoutineId } = api;
   const [picker, setPicker] = useState(false);
@@ -46,6 +48,11 @@ function RoutineEditor({ api, routine }) {
     const r = s.routines.find((x) => x.id === routine.id);
     if (r) r.ex[j][field] = value;
   });
+  const setRoutineProg = (v) => update((s) => {
+    const r = s.routines.find((x) => x.id === routine.id);
+    if (r) r.prog = v;
+  });
+  const setExProg = (j, v) => edit(j, 'prog', v);
   const removeEx = (j) => update((s) => {
     const r = s.routines.find((x) => x.id === routine.id);
     if (r) r.ex.splice(j, 1);
@@ -66,6 +73,14 @@ function RoutineEditor({ api, routine }) {
         <input className="input font-bold !text-sm flex-1" value={routine.name} onChange={(e) => rename(e.target.value)} placeholder={gymT(lang, 'routineName')} />
       </div>
 
+      <label className="flex items-center gap-2 text-xs text-slate-400">
+        {gymT(lang, 'prog')}
+        <select className="input !w-auto !py-1 !text-xs" value={routine.prog || 'linear'} onChange={(e) => setRoutineProg(e.target.value)}>
+          {PROG_OPTS.map((p) => <option key={p} value={p}>{gymT(lang, `prog.${p}`)}</option>)}
+        </select>
+        <span className="text-[10px] text-slate-400">{gymT(lang, 'prog.hint')}</span>
+      </label>
+
       <div className="space-y-2">
         {routine.ex.map((e2, j) => {
           const ex = exOr(e2.id);
@@ -82,6 +97,9 @@ function RoutineEditor({ api, routine }) {
                     {label}
                   </button>
                 ))}
+                <select className="chip !px-2 !py-1 text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-500" value={e2.prog || routine.prog || 'linear'} onChange={(e) => setExProg(j, e.target.value)}>
+                  {PROG_OPTS.map((p) => <option key={p} value={p}>{gymT(lang, `prog.${p}`)}</option>)}
+                </select>
               </div>
               <div className="flex flex-wrap gap-2 items-center">
                 <Stepper small lang={lang} value={e2.sets} onChange={(v) => edit(j, 'sets', v)} min={1} />
@@ -99,6 +117,9 @@ function RoutineEditor({ api, routine }) {
                   <>
                     <Stepper small lang={lang} value={e2.reps} onChange={(v) => edit(j, 'reps', v)} min={1} />
                     {e2.bodyweight ? null : <Stepper small lang={lang} value={e2.weight || 0} onChange={(v) => edit(j, 'weight', v)} min={0} step={2.5} />}
+                    {e2.prog === 'double' && (
+                      <Stepper small lang={lang} value={e2.repsMin || Math.max(1, (e2.reps || 10) - 2)} onChange={(v) => edit(j, 'repsMin', v)} min={1} />
+                    )}
                   </>
                 )}
               </div>
