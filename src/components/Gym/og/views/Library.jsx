@@ -5,8 +5,8 @@ import Modal from '../../../Common/Modal';
 import { gymT } from '../lib/i18n';
 import { allExercises, BODYPARTS, equipmentOf } from '../lib/exercises';
 import { BP_FA, EQ_FA } from '../lib/calc';
-import { musclesOf } from '../lib/muscles';
-import BodyMap from '../components/BodyMap';
+import { musclesOf, MUSCLE_NAME, MUSCLE_FA } from '../lib/muscles';
+import BodyMap, { BodyMapLegend } from '../components/BodyMap';
 import { faStepsFor } from '../data/faSteps';
 import { localizeDigits } from '../../../../utils/dateUtils';
 
@@ -16,6 +16,7 @@ export default function Library({ api }) {
   const [bp, setBp] = useState('');
   const [eq, setEq] = useState('');
   const [detail, setDetail] = useState(null);
+  const [detailMuscle, setDetailMuscle] = useState(null);
 
   const list = useMemo(() => {
     const all = allExercises(S);
@@ -78,7 +79,7 @@ export default function Library({ api }) {
       </div>
       {list.length === 0 && <p className="text-center text-sm text-slate-400 py-8">{gymT(lang, 'empty')}</p>}
 
-      <Modal open={!!detail} onClose={() => setDetail(null)} title={detail?.n || ''}>
+      <Modal open={!!detail} onClose={() => { setDetail(null); setDetailMuscle(null); }} title={detail?.n || ''}>
         {detail && (
           <div className="space-y-3">
             <div className="flex flex-wrap gap-1.5 text-[11px]">
@@ -88,7 +89,18 @@ export default function Library({ api }) {
             </div>
             <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3">
               <p className="text-xs font-semibold text-slate-500 mb-2">💪 {gymT(lang, 'muscleMap')}</p>
-              <BodyMap load={musclesOf(detail)} lang={lang} />
+              <BodyMap load={musclesOf(detail)} onMuscle={setDetailMuscle} selected={detailMuscle} lang={lang} />
+              <div className="mt-2 flex flex-wrap items-center gap-2 justify-center">
+                <BodyMapLegend lang={lang} />
+              </div>
+              {(detailMuscle || Object.keys(musclesOf(detail) || {})) ? (
+                <p className="text-[11px] text-slate-400 text-center mt-2">
+                  {gymT(lang, 'target')}:{' '}
+                  {(detailMuscle ? [detailMuscle] : Object.keys(musclesOf(detail)))
+                    .map((m) => (lang === 'fa' ? (MUSCLE_FA[m] || m) : (MUSCLE_NAME[m] || m)))
+                    .join(' · ')}
+                </p>
+              ) : null}
             </div>
             {(faStepsFor(detail.n) || detail.st)?.length ? (
               <ol className="list-decimal ps-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">

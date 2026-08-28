@@ -5,7 +5,7 @@ import { gymT } from '../lib/i18n';
 import { workoutVolume, setsDone, streakWeeks, weekKey, bestSetOf, estimate1RM, isoOf } from '../lib/calc';
 import { exOr, EXIDX } from '../lib/exercises';
 import { loadOfWorkouts, MUSCLES, MUSCLE_NAME, MUSCLE_FA, rankOf } from '../lib/muscles';
-import BodyMap from '../components/BodyMap';
+import BodyMap, { BodyMapLegend } from '../components/BodyMap';
 import { localizeDigits, fmtShort } from '../../../../utils/dateUtils';
 
 // GitHub-style year heatmap of training days (workouts per day → intensity).
@@ -66,6 +66,7 @@ export function MuscleBalance({ workouts, lang }) {
   return (
     <div className="space-y-3">
       <BodyMap load={load} lang={lang} />
+      <div className="flex justify-center"><BodyMapLegend lang={lang} /></div>
       <div className="space-y-1.5">
         <p className="text-xs font-semibold text-slate-500">{gymT(lang, 'worked')}</p>
         {worked.slice(0, 8).map((m) => (

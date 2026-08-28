@@ -11,7 +11,7 @@ import { gymT } from '../lib/i18n';
 import { DAYN, modeOf, defaultConfig } from '../lib/calc';
 import { exOr } from '../lib/exercises';
 import { loadOfRoutine } from '../lib/muscles';
-import BodyMap from '../components/BodyMap';
+import BodyMap, { BodyMapLegend } from '../components/BodyMap';
 import { uid } from '../lib/util';
 import { localizeDigits } from '../../../../utils/dateUtils';
 
@@ -136,6 +136,7 @@ function RoutineEditor({ api, routine }) {
         <Card className="!p-4">
           <p className="text-xs font-semibold text-slate-500 mb-2">💪 {gymT(lang, 'muscleMap')} — {gymT(lang, 'prog.hint')}</p>
           <BodyMap load={loadOfRoutine(routine)} lang={lang} />
+          <div className="mt-2 flex justify-center"><BodyMapLegend lang={lang} /></div>
         </Card>
       )}
       <ExercisePicker open={picker} onClose={() => setPicker(false)} onSelect={addEx} state={api.S} lang={lang} />
