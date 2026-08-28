@@ -6,12 +6,33 @@ const DEVICE_KEY = 'parto_device_id';
 
 export const APP_VERSION = '1.0.0';
 
+// Default state for the openGym-style training module. Kept normalized to the
+// Parto data model so it persists to localStorage and rides the existing cloud
+// sync (Supabase) → later it can be synced between phone and computer.
+export function defaultOpengym() {
+  return {
+    unit: 'kg',
+    restSec: 90,
+    targetW: null,
+    bodyweight: [],
+    routines: [],
+    week: {},      // weekday (0=Sun..6) -> routineId
+    dayPlan: {},   // ISO date -> 'rest' | routineId
+    exWeights: {}, // exerciseId -> { w }
+    workouts: [],  // finished sessions
+    active: null,  // in-progress session
+    customEx: [],
+    effort: null,  // 'none' | 'rir' | 'rpe'
+  };
+}
+
 export function defaultData() {
   return {
     tasks: { gym: [], programming: [], german: [], gaming: [], custom: [] },
     dailyTasks: [],
     german: { currentLevel: 'A1.1', goalLevel: 'B2', completedUnits: {}, skillMinutes: { Vocabulary: 0, Grammar: 0, Listening: 0, Speaking: 0, Reading: 0, Writing: 0 }, studyLog: [], testHistory: [], uploadedFileMeta: [], vocabProgress: {}, speakingDone: {}, speakingSkipped: {}, speakingLater: {} },
     gymProgram: [],
+    opengym: defaultOpengym(),
     habits: defaultHabits(),
     calendar: [],
     pomodoro: {

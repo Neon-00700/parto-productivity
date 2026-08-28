@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { v4 as uuid } from 'uuid';
-import { loadData, saveData, defaultData } from '../utils/storageUtils';
+import { loadData, saveData, defaultData, defaultOpengym } from '../utils/storageUtils';
 import { todayKey, isoDay, dateKey, addDays } from '../utils/dateUtils';
 import { XP_RULES, levelOf } from '../utils/gamification';
 import { defaultHabits } from '../data/defaultHabits';
@@ -43,6 +43,7 @@ export function AppProvider({ children }) {
   const meaningfulLocal = useCallback((d) => !!(
     (d.tasks && Object.values(d.tasks).some(a => (a || []).length)) ||
     (d.dailyTasks || []).length || (d.games || []).length || (d.gymProgram || []).length ||
+    (d.opengym && (d.opengym.workouts || []).length) ||
     (d.calendar || []).length || (d.flashcards || []).length || (d.notes || []).length ||
     (d.journal || []).length || (d.expenses || []).length || (d.bodyLog || []).length ||
     (d.templates || []).length || (d.pomodoro?.history || []).length ||
@@ -312,6 +313,19 @@ export function AppProvider({ children }) {
   // ---------- gym program ----------
   const setGymProgram = useCallback((rows) => {
     update((d) => { d.gymProgram = rows; return d; });
+  }, [update]);
+
+  // ---------- opengym (training module) ----------
+  const updateOpengym = useCallback((producer) => {
+    update((d) => {
+      d.opengym = { ...defaultOpengym(), ...(d.opengym || {}) };
+      producer(d.opengym);
+      d.opengym._ts = Date.now();
+      return d;
+    });
+  }, [update]);
+  const setOpengym = useCallback((state) => {
+    update((d) => { d.opengym = { ...defaultOpengym(), ...state, _ts: Date.now() }; return d; });
   }, [update]);
 
   // ---------- habits ----------
@@ -592,7 +606,7 @@ export function AppProvider({ children }) {
 
   const resetSection = useCallback((section) => {
     update((d) => {
-      if (section === 'gym') { d.tasks.gym = []; d.gymProgram = []; }
+      if (section === 'gym') { d.tasks.gym = []; d.gymProgram = []; d.opengym = defaultOpengym(); }
       else if (section === 'programming') d.tasks.programming = [];
       else if (section === 'german') { d.tasks.german = []; d.flashcards = []; }
       else if (section === 'gaming') { d.tasks.gaming = []; d.games = []; }
@@ -638,7 +652,7 @@ export function AppProvider({ children }) {
     updateSettings,
     addDailyTask, updateDailyTask, deleteDailyTask, toggleDailyTask, addGameToToday, updateTodayGameActivity, startDailyTimer, stopDailyTimer,
     addTask, updateTask, toggleTask, deleteTask, bulkTasks, reorderTasks, addCustomTag,
-    setGymProgram,
+    setGymProgram, updateOpengym, setOpengym,
     addHabit, updateHabit, deleteHabit, toggleHabit, setWater,
     addEvent, updateEvent, deleteEvent,
     addCard, updateCard, deleteCard, reviewCard,
