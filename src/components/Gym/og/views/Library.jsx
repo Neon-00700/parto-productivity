@@ -5,6 +5,9 @@ import Modal from '../../../Common/Modal';
 import { gymT } from '../lib/i18n';
 import { allExercises, BODYPARTS, equipmentOf } from '../lib/exercises';
 import { BP_FA, EQ_FA } from '../lib/calc';
+import { musclesOf } from '../lib/muscles';
+import BodyMap from '../components/BodyMap';
+import { faStepsFor } from '../data/faSteps';
 import { localizeDigits } from '../../../../utils/dateUtils';
 
 export default function Library({ api }) {
@@ -83,9 +86,13 @@ export default function Library({ api }) {
               {detail.eq && <span className="chip">{lang === 'fa' ? (EQ_FA[detail.eq] || detail.eq) : detail.eq}</span>}
               {detail.tg && <span className="chip">{detail.tg}</span>}
             </div>
-            {detail.st?.length ? (
+            <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3">
+              <p className="text-xs font-semibold text-slate-500 mb-2">💪 {gymT(lang, 'muscleMap')}</p>
+              <BodyMap load={musclesOf(detail)} lang={lang} />
+            </div>
+            {(faStepsFor(detail.n) || detail.st)?.length ? (
               <ol className="list-decimal ps-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
-                {detail.st.map((s, i) => <li key={i}>{s}</li>)}
+                {(faStepsFor(detail.n) || detail.st).map((s, i) => <li key={i}>{s}</li>)}
               </ol>
             ) : (
               <p className="text-sm text-slate-400">{gymT(lang, 'empty')}</p>

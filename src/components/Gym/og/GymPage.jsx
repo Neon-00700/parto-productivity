@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FiCalendar, FiPlay, FiBarChart2, FiDroplet, FiBookOpen } from 'react-icons/fi';
+import { FiHome, FiCalendar, FiPlay, FiBarChart2, FiDroplet, FiBookOpen, FiHelpCircle } from 'react-icons/fi';
 import { useApp } from '../../../contexts/AppContext';
 import { useTranslation } from '../../../hooks/useTranslation';
+import Modal from '../../Common/Modal';
 import { gymT } from './lib/i18n';
 import { localizeDigits } from '../../../utils/dateUtils';
 import Home from './views/Home';
@@ -16,35 +17,52 @@ export default function GymPage() {
   const { lang } = useTranslation();
   const [tab, setTab] = useState('home');
   const [routineId, setRoutineId] = useState(null); // for routine editor in Plan
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const S = data.opengym || {};
   const api = { S, update: updateOpengym, set: setOpengym, lang, go: setTab, routineId, setRoutineId };
 
   const tabs = [
-    { id: 'home', icon: <FiCalendar size={14} />, label: gymT(lang, 'nav.plan') },
+    { id: 'home', icon: <FiHome size={14} />, label: gymT(lang, 'nav.home') },
+    { id: 'plan', icon: <FiCalendar size={14} />, label: gymT(lang, 'nav.plan') },
     { id: 'workout', icon: <FiPlay size={14} />, label: gymT(lang, 'nav.workout') },
     { id: 'body', icon: <FiDroplet size={14} />, label: gymT(lang, 'nav.body') },
     { id: 'library', icon: <FiBookOpen size={14} />, label: gymT(lang, 'nav.library') },
     { id: 'stats', icon: <FiBarChart2 size={14} />, label: gymT(lang, 'nav.stats') },
   ];
 
-  // Global training settings (shown as a slim strip under the tabs).
   const setEffort = (v) => update((s) => { s.effort = v; });
   const setRest = (v) => update((s) => { s.restSec = Number(v) || 90; });
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1 rounded-2xl bg-slate-200/70 dark:bg-slate-900 p-1 w-fit max-w-full overflow-x-auto">
-        {tabs.map((tb) => (
-          <button
-            key={tb.id}
-            onClick={() => setTab(tb.id)}
-            className={`btn !py-1.5 !text-xs whitespace-nowrap ${tab === tb.id ? 'bg-white dark:bg-slate-800 shadow-sm text-primary' : 'text-slate-500'}`}
-          >
-            {tb.icon} {tb.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex gap-1 rounded-2xl bg-slate-200/70 dark:bg-slate-900 p-1 w-fit max-w-full overflow-x-auto flex-1">
+          {tabs.map((tb) => (
+            <button
+              key={tb.id}
+              onClick={() => setTab(tb.id)}
+              className={`btn !py-1.5 !text-xs whitespace-nowrap ${tab === tb.id ? 'bg-white dark:bg-slate-800 shadow-sm text-primary' : 'text-slate-500'}`}
+            >
+              {tb.icon} {tb.label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => setHelpOpen(true)}
+          className="btn-ghost !px-3 !py-1.5 !text-xs flex items-center gap-1 text-slate-500"
+          style={{ color: 'rgb(var(--c-primary))' }}
+        >
+          <FiHelpCircle size={14} /> {gymT(lang, 'help')}
+        </button>
       </div>
+
+      {/* If the user hasn't built a plan yet, show a one-line hint to guide them. */}
+      {tab === 'home' && !S.routines.length && (
+        <div className="card !p-3 text-xs text-slate-400 flex items-center gap-2">
+          <span>💡</span> {gymT(lang, 'noDefault')}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2 px-1">
         <label className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -71,10 +89,24 @@ export default function GymPage() {
       </div>
 
       {tab === 'home' && <Home api={api} />}
+      {tab === 'plan' && <Plan api={api} />}
       {tab === 'workout' && <Workout api={api} />}
       {tab === 'body' && <Body api={api} />}
       {tab === 'library' && <Library api={api} />}
       {tab === 'stats' && <Stats api={api} />}
+
+      <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title={gymT(lang, 'help')}>
+        <div className="space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
+          <p className="font-semibold">{gymT(lang, 'helpIntro')}</p>
+          <ol className="space-y-2 list-none ps-0">
+            <li className="flex gap-2"><span className="text-primary font-bold">۱</span> {gymT(lang, 'helpCreatRoutine')}</li>
+            <li className="flex gap-2"><span className="text-primary font-bold">۲</span> {gymT(lang, 'helpAddEx')}</li>
+            <li className="flex gap-2"><span className="text-primary font-bold">۳</span> {gymT(lang, 'helpStart')}</li>
+            <li className="flex gap-2"><span className="text-primary font-bold">۴</span> {gymT(lang, 'helpProgress')}</li>
+            <li className="flex gap-2"><span className="text-primary font-bold">۵</span> {gymT(lang, 'helpMap')}</li>
+          </ol>
+        </div>
+      </Modal>
     </div>
   );
 }

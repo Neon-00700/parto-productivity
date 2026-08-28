@@ -10,8 +10,9 @@ import Stepper from '../components/Stepper';
 import { gymT } from '../lib/i18n';
 import { DAYN, modeOf, defaultConfig } from '../lib/calc';
 import { exOr } from '../lib/exercises';
+import { loadOfRoutine } from '../lib/muscles';
+import BodyMap from '../components/BodyMap';
 import { uid } from '../lib/util';
-import { buildStarterPlan } from '../data/starter';
 import { localizeDigits } from '../../../../utils/dateUtils';
 
 function DayAssignSheet({ lang, day, routines, week, onPick, onClose }) {
@@ -130,6 +131,13 @@ function RoutineEditor({ api, routine }) {
 
       <Button variant="soft" className="w-full !justify-center" onClick={() => setPicker(true)}><FiPlus size={15} /> {gymT(lang, 'addExercise')}</Button>
       {routine.ex.length === 0 && <EmptyState message={gymT(lang, 'empty')} icon={<span className="text-3xl">🏋️</span>} />}
+
+      {routine.ex.length > 0 && (
+        <Card className="!p-4">
+          <p className="text-xs font-semibold text-slate-500 mb-2">💪 {gymT(lang, 'muscleMap')} — {gymT(lang, 'prog.hint')}</p>
+          <BodyMap load={loadOfRoutine(routine)} lang={lang} />
+        </Card>
+      )}
       <ExercisePicker open={picker} onClose={() => setPicker(false)} onSelect={addEx} state={api.S} lang={lang} />
 
       <Button variant="danger" className="w-full !justify-center" onClick={() => {
@@ -159,11 +167,6 @@ export default function Plan({ api }) {
     const r = { id: uid(), name: gymT(lang, 'newRoutine'), emoji: '🏋️', ex: [] };
     update((s) => { s.routines.push(r); });
     setRoutineId(r.id);
-  };
-  const loadStarter = () => {
-    const { routines, week } = buildStarterPlan();
-    update((s) => { s.routines = routines; s.week = week; });
-    toast.success(gymT(lang, 'workoutSaved'));
   };
 
   return (
@@ -206,7 +209,7 @@ export default function Plan({ api }) {
             ))}
           </div>
         ) : (
-          <EmptyState message={gymT(lang, 'noRoutinesHint')} action={<Button variant="soft" onClick={loadStarter}>{gymT(lang, 'loadStarter')}</Button>} />
+          <EmptyState message={gymT(lang, 'noRoutinesHint')} action={<Button variant="soft" onClick={newRoutine}><FiPlus size={13} /> {gymT(lang, 'newRoutine')}</Button>} />
         )}
       </div>
 

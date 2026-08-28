@@ -4,6 +4,8 @@ import EmptyState from '../../../Common/EmptyState';
 import { gymT } from '../lib/i18n';
 import { workoutVolume, setsDone, streakWeeks, weekKey, bestSetOf, estimate1RM, isoOf } from '../lib/calc';
 import { exOr, EXIDX } from '../lib/exercises';
+import { loadOfWorkouts, MUSCLES, MUSCLE_NAME, MUSCLE_FA, rankOf } from '../lib/muscles';
+import BodyMap from '../components/BodyMap';
 import { localizeDigits, fmtShort } from '../../../../utils/dateUtils';
 
 // GitHub-style year heatmap of training days (workouts per day → intensity).
@@ -52,34 +54,36 @@ export function Heatmap({ workouts, lang }) {
   );
 }
 
-// Muscle balance — how much each target muscle got trained over all workouts.
+// Muscle balance — a front/back body map + a ranked list of worked & missed muscles.
 export function MuscleBalance({ workouts, lang }) {
-  const rows = useMemo(() => {
-    const acc = {};
-    let total = 0;
-    workouts.forEach((w) => w.entries.forEach((e) => {
-      const ex = e.id ? EXIDX[e.id] : null;
-      const tg = ex?.tg || 'misc';
-      const sets = e.sets.filter((s) => s.done).length;
-      if (!sets) return;
-      acc[tg] = (acc[tg] || 0) + sets;
-      total += sets;
-    }));
-    return Object.entries(acc).map(([k, v]) => ({ k, v })).sort((a, b) => b.v - a.v).map((r) => ({ ...r, pct: total ? Math.round((r.v / total) * 100) : 0 }));
-  }, [workouts]);
+  const load = useMemo(() => loadOfWorkouts(workouts), [workouts]);
+  const { worked, missed } = useMemo(() => rankOf(load), [load]);
+  const max = Math.max(0, ...MUSCLES.map((m) => load[m] || 0));
 
-  if (!rows.length) return <EmptyState message={gymT(lang, 'empty')} icon={<span className="text-3xl">💪</span>} />;
+  const name = (m) => (lang === 'fa' ? (MUSCLE_FA[m] || m) : (MUSCLE_NAME[m] || m));
+
+  if (!worked.length) return <EmptyState message={gymT(lang, 'empty')} icon={<span className="text-3xl">💪</span>} />;
   return (
-    <div className="space-y-2">
-      {rows.map((r) => (
-        <div key={r.k} className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 w-24 shrink-0 truncate">{r.k}</span>
-          <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-            <div className="h-full rounded-full" style={{ width: `${r.pct}%`, background: 'rgb(var(--c-primary))' }} />
+    <div className="space-y-3">
+      <BodyMap load={load} lang={lang} />
+      <div className="space-y-1.5">
+        <p className="text-xs font-semibold text-slate-500">{gymT(lang, 'worked')}</p>
+        {worked.slice(0, 8).map((m) => (
+          <div key={m} className="flex items-center gap-2">
+            <span className="text-xs text-slate-500 w-24 shrink-0 truncate">{name(m)}</span>
+            <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-full rounded-full" style={{ width: `${max ? (load[m] / max) * 100 : 0}%`, background: 'rgb(var(--c-primary))' }} />
+            </div>
+            <span className="text-xs text-slate-400 w-8 text-end tabular-nums">{localizeDigits(load[m], lang)}</span>
           </div>
-          <span className="text-xs text-slate-400 w-10 text-end tabular-nums">{localizeDigits(r.pct, lang)}٪</span>
-        </div>
-      ))}
+        ))}
+        {missed.length > 0 && (
+          <>
+            <p className="text-xs font-semibold text-slate-500 pt-2">{gymT(lang, 'missed')}</p>
+            <p className="text-[11px] text-slate-400">{missed.map(name).join(' · ')}</p>
+          </>
+        )}
+      </div>
     </div>
   );
 }

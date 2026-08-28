@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import toast from 'react-hot-toast';
 import { FiPlay, FiChevronRight, FiTarget } from 'react-icons/fi';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ReferenceDot } from 'recharts';
 import Button from '../../../Common/Button';
@@ -8,7 +7,6 @@ import EmptyState from '../../../Common/EmptyState';
 import { gymT } from '../lib/i18n';
 import { effectiveRoutine, lastBW, streakWeeks, todayISO } from '../lib/calc';
 import { exOr } from '../lib/exercises';
-import { buildStarterPlan } from '../data/starter';
 import { localizeDigits, fmtShort } from '../../../../utils/dateUtils';
 import { startFlow } from '../lib/session';
 
@@ -24,15 +22,6 @@ export default function Home({ api }) {
     [S.bodyweight, lang]
   );
   const hasChart = chartData.length >= 2;
-
-  const loadStarter = () => {
-    const { routines, week } = buildStarterPlan();
-    update((s) => {
-      s.routines = routines;
-      s.week = week;
-    });
-    toast.success(gymT(lang, 'workoutSaved')); // reuse a generic success copy
-  };
 
   return (
     <div className="space-y-3">
@@ -61,7 +50,7 @@ export default function Home({ api }) {
         )}
         {(!S.routines.length && !S.active) && (
           <div className="mt-3 flex gap-2 flex-wrap">
-            <Button variant="soft" onClick={loadStarter}>{gymT(lang, 'loadStarter')}</Button>
+            <Button variant="soft" onClick={() => go('plan')}>{gymT(lang, 'buildPlanFirst')}</Button>
             <Button variant="ghost" onClick={() => go('workout')}>{gymT(lang, 'freestyle')}</Button>
           </div>
         )}
