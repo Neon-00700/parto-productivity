@@ -1,0 +1,16 @@
+{
+  "name": "Parto Productivity | پرتو",
+  "short_name": "Parto",
+  "description": "Bilingual personal productivity app: tasks, habits, pomodoro, calendar, flashcards",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0ea5e9",
+  "dir": "rtl",
+  "lang": "fa",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
