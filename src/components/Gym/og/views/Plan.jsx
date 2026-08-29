@@ -15,6 +15,16 @@ import BodyMap, { BodyMapLegend } from '../components/BodyMap';
 import { uid } from '../lib/util';
 import { localizeDigits } from '../../../../utils/dateUtils';
 
+// A small labelled stepper: shows what the number means (e.g. "set", "rep", "kg").
+function Field({ label, children }) {
+  return (
+    <label className="flex flex-col items-center gap-0.5">
+      <span className="text-[9px] text-slate-400 leading-none">{label}</span>
+      {children}
+    </label>
+  );
+}
+
 function DayAssignSheet({ lang, day, routines, week, onPick, onClose }) {
   return (
     <Modal open={!!day} onClose={onClose} title={DAYN[day]}>
@@ -102,24 +112,24 @@ function RoutineEditor({ api, routine }) {
                   {PROG_OPTS.map((p) => <option key={p} value={p}>{gymT(lang, `prog.${p}`)}</option>)}
                 </select>
               </div>
-              <div className="flex flex-wrap gap-2 items-center">
-                <Stepper small lang={lang} value={e2.sets} onChange={(v) => edit(j, 'sets', v)} min={1} />
+              <div className="flex flex-wrap gap-2 items-end">
+                <Field label={gymT(lang, 'sets')}><Stepper small lang={lang} value={e2.sets} onChange={(v) => edit(j, 'sets', v)} min={1} /></Field>
                 {mode === 'cardio' ? (
                   <>
-                    <Stepper small lang={lang} value={e2.min} onChange={(v) => edit(j, 'min', v)} min={1} />
-                    <Stepper small lang={lang} value={e2.speed} onChange={(v) => edit(j, 'speed', v)} min={0} decimal step={0.5} />
+                    <Field label={gymT(lang, 'durationMin')}><Stepper small lang={lang} value={e2.min} onChange={(v) => edit(j, 'min', v)} min={1} /></Field>
+                    <Field label={gymT(lang, 'speed')}><Stepper small lang={lang} value={e2.speed} onChange={(v) => edit(j, 'speed', v)} min={0} decimal step={0.5} /></Field>
                   </>
                 ) : mode === 'time' ? (
                   <>
-                    <Stepper small lang={lang} value={e2.sec} onChange={(v) => edit(j, 'sec', v)} min={5} step={5} />
-                    <Stepper small lang={lang} value={e2.weight || 0} onChange={(v) => edit(j, 'weight', v)} min={0} step={2.5} />
+                    <Field label={gymT(lang, 'seconds')}><Stepper small lang={lang} value={e2.sec} onChange={(v) => edit(j, 'sec', v)} min={5} step={5} /></Field>
+                    <Field label={gymT(lang, 'weight')}><Stepper small lang={lang} value={e2.weight || 0} onChange={(v) => edit(j, 'weight', v)} min={0} step={2.5} /></Field>
                   </>
                 ) : (
                   <>
-                    <Stepper small lang={lang} value={e2.reps} onChange={(v) => edit(j, 'reps', v)} min={1} />
-                    {e2.bodyweight ? null : <Stepper small lang={lang} value={e2.weight || 0} onChange={(v) => edit(j, 'weight', v)} min={0} step={2.5} />}
+                    <Field label={gymT(lang, 'reps')}><Stepper small lang={lang} value={e2.reps} onChange={(v) => edit(j, 'reps', v)} min={1} /></Field>
+                    {e2.bodyweight ? null : <Field label={gymT(lang, 'weight')}><Stepper small lang={lang} value={e2.weight || 0} onChange={(v) => edit(j, 'weight', v)} min={0} step={2.5} /></Field>}
                     {e2.prog === 'double' && (
-                      <Stepper small lang={lang} value={e2.repsMin || Math.max(1, (e2.reps || 10) - 2)} onChange={(v) => edit(j, 'repsMin', v)} min={1} />
+                      <Field label={`${gymT(lang, 'reps')}↓`}><Stepper small lang={lang} value={e2.repsMin || Math.max(1, (e2.reps || 10) - 2)} onChange={(v) => edit(j, 'repsMin', v)} min={1} /></Field>
                     )}
                   </>
                 )}

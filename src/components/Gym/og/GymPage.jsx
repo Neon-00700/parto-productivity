@@ -95,16 +95,42 @@ export default function GymPage() {
       {tab === 'library' && <Library api={api} />}
       {tab === 'stats' && <Stats api={api} />}
 
-      <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title={gymT(lang, 'help')}>
-        <div className="space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
-          <p className="font-semibold">{gymT(lang, 'helpIntro')}</p>
-          <ol className="space-y-2 list-none ps-0">
-            <li className="flex gap-2"><span className="text-primary font-bold">۱</span> {gymT(lang, 'helpCreatRoutine')}</li>
-            <li className="flex gap-2"><span className="text-primary font-bold">۲</span> {gymT(lang, 'helpAddEx')}</li>
-            <li className="flex gap-2"><span className="text-primary font-bold">۳</span> {gymT(lang, 'helpStart')}</li>
-            <li className="flex gap-2"><span className="text-primary font-bold">۴</span> {gymT(lang, 'helpProgress')}</li>
-            <li className="flex gap-2"><span className="text-primary font-bold">۵</span> {gymT(lang, 'helpMap')}</li>
-          </ol>
+      <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title={gymT(lang, 'help')} wide>
+        <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+          <div>
+            <p className="font-semibold mb-2">{gymT(lang, 'helpIntro')}</p>
+            <ol className="space-y-2 list-none ps-0">
+              <li className="flex gap-2"><span className="text-primary font-bold">۱</span> {gymT(lang, 'helpCreatRoutine')}</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">۲</span> {gymT(lang, 'helpAddEx')}</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">۳</span> {gymT(lang, 'helpStart')}</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">۴</span> {gymT(lang, 'helpProgress')}</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">۵</span> {gymT(lang, 'helpMap')}</li>
+            </ol>
+          </div>
+
+          <div className="border-t border-slate-200 dark:border-slate-800 pt-3">
+            <p className="font-semibold mb-2">📖 {gymT(lang, 'glossary')}</p>
+            <p className="text-xs text-slate-400 mb-2">{gymT(lang, 'gloss.intro')}</p>
+            <dl className="grid sm:grid-cols-2 gap-x-4 gap-y-2">
+              {[
+                ['gloss.set', 'gloss.setD'],
+                ['gloss.rep', 'gloss.repD'],
+                ['gloss.weight', 'gloss.weightD'],
+                ['gloss.effort', 'gloss.effortD'],
+                ['gloss.prog', 'gloss.progD'],
+                ['gloss.rest', 'gloss.restD'],
+                ['gloss.bw', 'gloss.bwD'],
+                ['gloss.side', 'gloss.sideD'],
+                ['gloss.timed', 'gloss.timedD'],
+                ['gloss.cardio', 'gloss.cardioD'],
+              ].map(([k, d]) => (
+                <div key={k}>
+                  <dt className="text-xs font-semibold" style={{ color: 'rgb(var(--c-primary))' }}>{gymT(lang, k)}</dt>
+                  <dd className="text-xs text-slate-500 dark:text-slate-400">{gymT(lang, d)}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
         </div>
       </Modal>
     </div>

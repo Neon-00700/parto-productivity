@@ -7,7 +7,7 @@ import { allExercises, BODYPARTS, equipmentOf } from '../lib/exercises';
 import { BP_FA, EQ_FA } from '../lib/calc';
 import { musclesOf, MUSCLE_NAME, MUSCLE_FA } from '../lib/muscles';
 import BodyMap, { BodyMapLegend } from '../components/BodyMap';
-import { faStepsFor } from '../data/faSteps';
+import { faStepsFor, faGuideFor } from '../data/faSteps';
 import { localizeDigits } from '../../../../utils/dateUtils';
 
 export default function Library({ api }) {
@@ -102,13 +102,23 @@ export default function Library({ api }) {
                 </p>
               ) : null}
             </div>
-            {(faStepsFor(detail.n) || detail.st)?.length ? (
-              <ol className="list-decimal ps-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
-                {(faStepsFor(detail.n) || detail.st).map((s, i) => <li key={i}>{s}</li>)}
-              </ol>
-            ) : (
-              <p className="text-sm text-slate-400">{gymT(lang, 'empty')}</p>
-            )}
+            <div>
+              <p className="text-xs font-semibold text-slate-500 mb-1.5">{gymT(lang, 'howTo')}</p>
+              {lang === 'fa' ? (
+                <div className="space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
+                  {faGuideFor(detail).map((s, i) => <p key={i}>{s}</p>)}
+                  {faStepsFor(detail.n) && (
+                    <ol className="list-decimal ps-5 space-y-1.5 pt-1">
+                      {faStepsFor(detail.n).map((s, i) => <li key={i}>{s}</li>)}
+                    </ol>
+                  )}
+                </div>
+              ) : (
+                <ol className="list-decimal ps-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
+                  {(detail.st || []).map((s, i) => <li key={i}>{s}</li>)}
+                </ol>
+              )}
+            </div>
           </div>
         )}
       </Modal>

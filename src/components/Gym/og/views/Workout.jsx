@@ -138,11 +138,11 @@ function ExerciseBlock({ api, entryIdx, compact = false, onRest }) {
   };
   const typeEff = (i, col, v) => { const n = Number(v); if (!isFinite(n)) return setField(api, entryIdx, i, col, null); setField(api, entryIdx, i, col, Math.min(EFFORT[kind].max, Math.max(0, n))); };
 
-  const cell = (i, col, meta) => (
-    <div className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800/70 p-0.5">
-      <button type="button" onClick={() => bump(i, col, -1, meta)} className="h-7 w-7 grid place-items-center rounded-md text-slate-400 hover:text-primary"><FiMinus size={12} /></button>
+  const cell = (i, col, meta, width = 'w-auto') => (
+    <div className={`inline-flex items-center justify-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800/70 p-0.5 ${width}`}>
+      <button type="button" onClick={() => bump(i, col, -1, meta)} className="h-7 w-7 shrink-0 grid place-items-center rounded-md text-slate-400 hover:text-primary"><FiMinus size={12} /></button>
       <input
-        className="bg-transparent text-center font-bold tabular-nums outline-none text-slate-800 dark:text-slate-100 w-11 text-sm"
+        className="bg-transparent text-center font-bold tabular-nums outline-none text-slate-800 dark:text-slate-100 w-9 text-sm"
         inputMode="decimal"
         value={entry.sets[i][col] == null ? '' : localizeDigits(entry.sets[i][col], lang)}
         onChange={(e) => {
@@ -151,7 +151,7 @@ function ExerciseBlock({ api, entryIdx, compact = false, onRest }) {
           const n = Number(e.target.value); if (isFinite(n)) setField(api, entryIdx, i, col, Math.max(0, n));
         }}
       />
-      <button type="button" onClick={() => bump(i, col, 1, meta)} className="h-7 w-7 grid place-items-center rounded-md text-slate-400 hover:text-primary"><FiPlus size={12} /></button>
+      <button type="button" onClick={() => bump(i, col, 1, meta)} className="h-7 w-7 shrink-0 grid place-items-center rounded-md text-slate-400 hover:text-primary"><FiPlus size={12} /></button>
     </div>
   );
 
@@ -191,22 +191,31 @@ function ExerciseBlock({ api, entryIdx, compact = false, onRest }) {
         </p>
       )}
 
+      {/* Column header row so the numbers are self-explanatory (set/reps/weight). */}
+      <div className="flex items-center gap-1.5 rounded-xl px-2 pb-1 text-[10px] text-slate-400">
+        <span className="w-5 text-center shrink-0">{gymT(lang, 'setShort')}</span>
+        <span className="w-[78px] shrink-0 text-center">{col1Label}</span>
+        {col2 ? <span className="w-[78px] shrink-0 text-center">{col2Label}</span> : null}
+        {effF ? <span className="w-[78px] shrink-0 text-center">{EFFORT[kind].hd}</span> : null}
+        <span className="flex-1" />
+        <span className="w-7 text-center">{gymT(lang, 'done')}</span>
+      </div>
+
       <div className="space-y-1.5">
         {entry.sets.map((s, i) => (
-          <div key={i} className="flex items-center gap-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5 flex-wrap">
+          <div key={i} className="flex items-center gap-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 px-2 py-1.5">
             <span className="w-5 text-center text-xs font-bold text-slate-400">{localizeDigits(i + 1, lang)}</span>
-            {cell(i, col1)}
-            {col2 && cell(i, col2)}
-            {effF && cell(i, effF, EFFORT[kind])}
-            <span className="text-[10px] text-slate-400 w-14 text-end">{col1Label}</span>
+            {cell(i, col1, null, 'w-[78px]')}
+            {col2 && cell(i, col2, null, 'w-[78px]')}
+            {effF && cell(i, effF, EFFORT[kind], 'w-[78px]')}
             {timed && running === i && !entry.sets[i].done && (
-              <WorkTimer sec={entry.sets[i].sec || 30} onDone={() => { setRunning(-1); toggle(i); }} />
+              <span className="shrink-0"><WorkTimer sec={entry.sets[i].sec || 30} onDone={() => { setRunning(-1); toggle(i); }} /></span>
             )}
             {timed && running !== i && !entry.sets[i].done && (
               <button
                 type="button"
                 onClick={() => startTimed(i)}
-                className="h-7 w-7 rounded-lg grid place-items-center border border-primary/40 text-primary hover:bg-primary/10"
+                className="h-7 w-7 shrink-0 rounded-lg grid place-items-center border border-primary/40 text-primary hover:bg-primary/10"
                 style={{ color: 'rgb(var(--c-primary))' }}
                 aria-label="Start set"
               >
