@@ -8,7 +8,7 @@ import { PomodoroProvider } from './contexts/PomodoroContext';
 import ErrorBoundary from './components/Common/ErrorBoundary';
 import Layout from './components/Layout/Layout';
 import Dashboard from './components/Dashboard/Dashboard';
-import GymPage from './components/Gym/GymPage';
+import GymPage from './components/Gym/og/GymPage';
 import ProgrammingPage from './components/Programming/ProgrammingPage';
 import GermanPage from './components/German/GermanPage';
 import GamingPage from './components/Gaming/GamingPage';
