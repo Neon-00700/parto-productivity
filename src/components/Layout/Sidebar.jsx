@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   FiHome, FiActivity, FiCode, FiBookOpen, FiPlay,
   FiCheckCircle, FiCalendar, FiClock, FiBarChart2, FiSettings,
-  FiFeather, FiDollarSign, FiList,
+  FiFeather, FiDollarSign, FiList, FiBook,
 } from 'react-icons/fi';
 import LevelWidget from '../Dashboard/LevelWidget';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -15,6 +15,7 @@ export const NAV_ITEMS = [
   { to: '/today', key: 'today', icon: FiList },
   { to: '/gym', key: 'gym', icon: FiActivity },
   { to: '/programming', key: 'programming', icon: FiCode },
+  { to: '/university', key: 'university', icon: FiBook },
   { to: '/german', key: 'german', icon: FiBookOpen },
   { to: '/gaming', key: 'gaming', icon: FiPlay },
   { to: '/habits', key: 'habits', icon: FiCheckCircle },

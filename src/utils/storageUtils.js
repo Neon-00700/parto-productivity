@@ -49,6 +49,7 @@ export function defaultData() {
     frog: { date: '', taskId: '', section: '' },
     gamification: { xp: 0 },
     customTags: ['React', 'Python', 'CSS', 'JavaScript'],
+    university: { courses: [], classes: [], exams: [], assignments: [], reference: { week: 'A', date: null } },
     programming: {
       technologies: [],
       projects: [],

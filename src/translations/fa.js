@@ -1,9 +1,11 @@
 import progFa from './prog/fa.js';
+import uniFa from './uni/fa.js';
 export default {
   ...progFa,
+  ...uniFa,
   app: { name: 'پرتو', tagline: 'مرکز بهره‌وری شخصی شما' },
   nav: {
-    dashboard: 'داشبورد', today: 'کارهای امروز', gym: 'باشگاه و تناسب اندام', programming: 'برنامه‌نویسی', german: 'زبان آلمانی',
+    dashboard: 'داشبورد', today: 'کارهای امروز', gym: 'باشگاه و تناسب اندام', programming: 'برنامه‌نویسی', german: 'زبان آلمانی', university: 'دانشگاه',
     gaming: 'بازی', habits: 'عادت‌ها', calendar: 'تقویم', pomodoro: 'پومودورو',
     journal: 'ژورنال', budget: 'بودجه',
     reports: 'گزارش‌ها', settings: 'تنظیمات', more: 'بیشتر',

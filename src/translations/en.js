@@ -1,9 +1,11 @@
 import progEn from './prog/en.js';
+import uniEn from './uni/en.js';
 export default {
   ...progEn,
+  ...uniEn,
   app: { name: 'Parto', tagline: 'Your personal productivity hub' },
   nav: {
-    dashboard: 'Dashboard', today: 'Today', gym: 'Gym & Fitness', programming: 'Programming', german: 'German',
+    dashboard: 'Dashboard', today: 'Today', gym: 'Gym & Fitness', programming: 'Programming', german: 'German', university: 'University',
     gaming: 'Gaming', habits: 'Habits', calendar: 'Calendar', pomodoro: 'Pomodoro',
     journal: 'Journal', budget: 'Budget',
     reports: 'Reports', settings: 'Settings', more: 'More',

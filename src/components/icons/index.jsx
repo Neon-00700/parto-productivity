@@ -3,12 +3,13 @@
 // light/dark themes automatically. Consistent stroke width (1.75) + sizing.
 import React from 'react';
 import {
-  FiActivity, FiAward, FiBookOpen, FiCheck, FiCheckCircle, FiChevronDown, FiClock,
+  FiActivity, FiAward, FiBookOpen, FiCalendar, FiCheck, FiCheckCircle, FiChevronDown, FiChevronRight, FiClock,
   FiCode, FiCpu, FiEdit2, FiExternalLink, FiEye, FiGithub, FiGrid, FiLink,
   FiLock, FiMinus, FiPause, FiPlay, FiPlus, FiSearch, FiSettings, FiShare2,
   FiSquare, FiTarget, FiTrash2, FiTrendingUp, FiUnlock, FiX, FiZap,
   FiArrowDown, FiArrowUp, FiChevronLeft, FiLayers, FiCircle, FiMap, FiCrosshair,
   FiZoomIn, FiZoomOut, FiCheckSquare, FiMoreVertical,
+  FiBook, FiClipboard, FiMapPin, FiUser, FiSun, FiInfo, FiCoffee, FiAlertCircle,
 } from 'react-icons/fi';
 
 const make = (Icon) => ({ size = 18, className = '', strokeWidth = 1.75, ...props }) => (
@@ -57,6 +58,19 @@ export const CrosshairIcon = make(FiCrosshair);
 export const ZoomInIcon = make(FiZoomIn);
 export const ZoomOutIcon = make(FiZoomOut);
 export const MoreIcon = make(FiMoreVertical);
+
+// ---- university section ----
+export const UniversityIcon = make(FiBook);
+export const DayIcon = make(FiSun);
+export const CourseIcon = make(FiBookOpen);
+export const ClassIcon = make(FiCalendar);
+export const ExamIcon = make(FiClipboard);
+export const AssignmentIcon = make(FiEdit2);
+export const LocationIcon = make(FiMapPin);
+export const UserIcon = make(FiUser);
+export const InfoIcon = make(FiInfo);
+export const CoffeeIcon = make(FiCoffee);
+export const AlertIcon = make(FiAlertCircle);
 
 // Section icons
 export const ProgrammingIcon = make(FiCode);
