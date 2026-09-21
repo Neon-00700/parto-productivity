@@ -1,4 +1,6 @@
+import progFa from './prog/fa.js';
 export default {
+  ...progFa,
   app: { name: 'پرتو', tagline: 'مرکز بهره‌وری شخصی شما' },
   nav: {
     dashboard: 'داشبورد', today: 'کارهای امروز', gym: 'باشگاه و تناسب اندام', programming: 'برنامه‌نویسی', german: 'زبان آلمانی',

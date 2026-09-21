@@ -41,7 +41,7 @@ export default function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/today" element={<DailyTasksPage />} />
                     <Route path="/gym" element={<GymPage />} />
-                    <Route path="/programming" element={<ProgrammingPage />} />
+                    <Route path="/programming/*" element={<ProgrammingPage />} />
                     <Route path="/german" element={<GermanPage />} />
                     <Route path="/gaming" element={<GamingPage />} />
                     <Route path="/habits" element={<HabitsPage />} />

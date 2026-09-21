@@ -49,6 +49,14 @@ export function defaultData() {
     frog: { date: '', taskId: '', section: '' },
     gamification: { xp: 0 },
     customTags: ['React', 'Python', 'CSS', 'JavaScript'],
+    programming: {
+      technologies: [],
+      projects: [],
+      activities: [],
+      goalEntries: {},
+      goalOrder: [],
+      timer: null,
+    },
     settings: {
       language: 'fa',
       theme: 'ocean',

@@ -645,7 +645,7 @@ export function AppProvider({ children }) {
   }, [data, today]);
 
   const value = {
-    data, setData, today,
+    data, setData, update, today,
     searchOpen, setSearchOpen, quickAddOpen, setQuickAddOpen,
     notesOpen, setNotesOpen,
     levelUpFlash, setLevelUpFlash, addXp,

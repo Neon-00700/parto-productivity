@@ -1,4 +1,6 @@
+import progEn from './prog/en.js';
 export default {
+  ...progEn,
   app: { name: 'Parto', tagline: 'Your personal productivity hub' },
   nav: {
     dashboard: 'Dashboard', today: 'Today', gym: 'Gym & Fitness', programming: 'Programming', german: 'German',
