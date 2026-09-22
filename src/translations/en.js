@@ -1,8 +1,10 @@
 import progEn from './prog/en.js';
 import uniEn from './uni/en.js';
+import gerEn from './german/en.js';
 export default {
   ...progEn,
   ...uniEn,
+  ...gerEn,
   app: { name: 'Parto', tagline: 'Your personal productivity hub' },
   nav: {
     dashboard: 'Dashboard', today: 'Today', gym: 'Gym & Fitness', programming: 'Programming', german: 'German', university: 'University',
@@ -62,15 +64,6 @@ export default {
     selectAll: 'Select all', statusTodo: 'To do', statusInProgress: 'In progress', statusDone: 'Done',
     archiveView: 'Archive', emptyArchive: 'Archive is empty', markDone: 'Mark done',
     dueToday: 'Due today', overdueBy: 'Overdue', restoreTask: 'Task restored',
-  },
-  german: {
-    study: 'Study tasks', flashcards: 'Flashcards', addCard: 'Add flashcard', editCard: 'Edit flashcard',
-    german: 'German word / phrase', persian: 'Persian meaning', english: 'English meaning',
-    example: 'Example sentence', level: 'Level', review: 'Review', showAnswer: 'Show answer',
-    easy: 'Easy · 3 days', medium: 'Medium · tomorrow', hard: 'Hard · 1 hour',
-    dueToday: 'Due now', mastered: 'Mastered', totalCards: 'Total cards', noDue: 'No cards due. Well done! 🎉',
-    nextCard: 'Next card', reviewDone: 'Review session complete!', allCards: 'All cards',
-    startReview: 'Start review', cardsLeft: 'cards left', deleteCard: 'Delete card',
   },
   gaming: {
     title: 'Game Tracker', subtitle: 'Track your play time and achievements. This is not a Todo list.',

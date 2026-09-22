@@ -2,9 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useRef, useState,
 import { v4 as uuid } from 'uuid';
 import { loadData, saveData, defaultData, defaultOpengym } from '../utils/storageUtils';
 import { todayKey, isoDay, dateKey, addDays } from '../utils/dateUtils';
-import { XP_RULES, levelOf } from '../utils/gamification';
 import { defaultHabits } from '../data/defaultHabits';
-import { GERMAN_LEVELS } from '../data/germanCourse';
 import { cloudConfigured, pushDataToCloud, pullDataFromCloud } from '../utils/cloudSync';
 
 const AppContext = createContext(null);
@@ -44,7 +42,7 @@ export function AppProvider({ children }) {
     (d.tasks && Object.values(d.tasks).some(a => (a || []).length)) ||
     (d.dailyTasks || []).length || (d.games || []).length || (d.gymProgram || []).length ||
     (d.opengym && (d.opengym.workouts || []).length) ||
-    (d.calendar || []).length || (d.flashcards || []).length || (d.notes || []).length ||
+    (d.calendar || []).length || (d.notes || []).length ||
     (d.journal || []).length || (d.expenses || []).length || (d.bodyLog || []).length ||
     (d.templates || []).length || (d.pomodoro?.history || []).length ||
     Object.keys(d.german?.completedUnits || {}).length || (d.german?.studyLog || []).length ||
@@ -114,23 +112,6 @@ export function AppProvider({ children }) {
   const dataRef = useRef(data);
   useEffect(() => { dataRef.current = data; }, [data]);
 
-  // ---------- gamification (XP) ----------
-  const xpRef = useRef(data.gamification?.xp || 0);
-  useEffect(() => { xpRef.current = data.gamification?.xp || 0; }, [data.gamification?.xp]);
-  const [levelUpFlash, setLevelUpFlash] = useState(null); // new level number, consumed by Layout
-
-  const addXp = useCallback((amount) => {
-    const before = levelOf(xpRef.current);
-    const after = levelOf(Math.max(0, xpRef.current + amount));
-    xpRef.current = Math.max(0, xpRef.current + amount);
-    if (after > before && amount > 0) setLevelUpFlash(after);
-    update((d) => {
-      d.gamification = d.gamification || { xp: 0 };
-      d.gamification.xp = Math.max(0, (d.gamification.xp || 0) + amount);
-      return d;
-    });
-  }, [update]);
-
   // ---------- settings ----------
   const updateSettings = useCallback((patch) => {
     update((d) => {
@@ -182,10 +163,8 @@ export function AppProvider({ children }) {
       if (recurringSpawn) d.tasks[section] = [recurringSpawn, ...d.tasks[section]];
       return d;
     });
-    // XP: symmetric award/remove prevents farming
-    addXp(wasDone ? -XP_RULES.task : XP_RULES.task);
     return !wasDone;
-  }, [update, addXp]);
+  }, [update]);
 
   const deleteTask = useCallback((section, id) => {
     let removed = null;
@@ -363,8 +342,7 @@ export function AppProvider({ children }) {
       });
       return d;
     });
-    addXp(wasDone ? -XP_RULES.habit : XP_RULES.habit);
-  }, [update, addXp]);
+  }, [update]);
 
   const setWater = useCallback((id, count, day = todayKey()) => {
     update((d) => {
@@ -400,74 +378,6 @@ export function AppProvider({ children }) {
       return d;
     });
   }, [update]);
-
-  // ---------- flashcards ----------
-  const addCard = useCallback((card) => {
-    update((d) => {
-      d.flashcards.push({
-        id: uuid(), german: '', persian: '', english: '', example: '', category: 'A1',
-        difficulty: null, reviews: 0, easyStreak: 0, nextReview: new Date().toISOString(),
-        createdAt: new Date().toISOString(), ...card,
-      });
-      return d;
-    });
-  }, [update]);
-
-  const updateCard = useCallback((id, patch) => {
-    update((d) => {
-      d.flashcards = d.flashcards.map((c) => (c.id === id ? { ...c, ...patch } : c));
-      return d;
-    });
-  }, [update]);
-
-  const deleteCard = useCallback((id) => {
-    update((d) => {
-      d.flashcards = d.flashcards.filter((c) => c.id !== id);
-      return d;
-    });
-  }, [update]);
-
-  // ---------- German learning ----------
-  const updateGerman = useCallback((patch) => {
-    update((d) => { d.german = { ...(d.german || {}), ...patch }; return d; });
-  }, [update]);
-  const setGermanUnitDone = useCallback((level, unitId, done = true) => {
-    update((d) => {
-      d.german = d.german || { currentLevel:'A1.1', goalLevel:'B2', completedUnits:{}, skillMinutes:{}, studyLog:[], testHistory:[], uploadedFileMeta:[] };
-      const key = `${level}:${unitId}`;
-      d.german.completedUnits = { ...(d.german.completedUnits || {}) };
-      if (done) d.german.completedUnits[key] = new Date().toISOString(); else delete d.german.completedUnits[key];
-      const currentIndex = Math.max(0, GERMAN_LEVELS.findIndex(x => x.id === (d.german.currentLevel || 'A1.1')));
-      const current = GERMAN_LEVELS[currentIndex];
-      if (done && current && current.units.every(u => d.german.completedUnits[`${current.id}:${u[0]}`])) {
-        const next = GERMAN_LEVELS[currentIndex + 1]; if (next) d.german.currentLevel = next.id;
-      }
-      return d;
-    });
-  }, [update]);
-  const addGermanStudy = useCallback((entry) => {
-    update((d) => { d.german = d.german || {}; d.german.studyLog = [...(d.german.studyLog || []), { id: uuid(), createdAt:new Date().toISOString(), ...entry }]; d.german.skillMinutes = { ...(d.german.skillMinutes || {}) }; if (entry.skill) d.german.skillMinutes[entry.skill] = (d.german.skillMinutes[entry.skill] || 0) + Number(entry.minutes || 0); return d; });
-  }, [update]);
-  const addGermanTestResult = useCallback((result) => {
-    update((d) => { d.german = d.german || {}; d.german.testHistory = [...(d.german.testHistory || []), { id:uuid(), createdAt:new Date().toISOString(), ...result }]; return d; });
-  }, [update]);
-
-  // spaced repetition: easy=3 days, medium=1 day, hard=1 hour
-  const reviewCard = useCallback((id, difficulty) => {
-    const next = new Date();
-    if (difficulty === 'easy') next.setDate(next.getDate() + 3);
-    else if (difficulty === 'medium') next.setDate(next.getDate() + 1);
-    else next.setHours(next.getHours() + 1);
-    update((d) => {
-      d.flashcards = d.flashcards.map((c) => {
-        if (c.id !== id) return c;
-        const easyStreak = difficulty === 'easy' ? (c.easyStreak || 0) + 1 : 0;
-        return { ...c, difficulty, reviews: (c.reviews || 0) + 1, easyStreak, nextReview: next.toISOString(), lastReview: new Date().toISOString() };
-      });
-      return d;
-    });
-    addXp(XP_RULES.flashcard);
-  }, [update, addXp]);
 
   // ---------- games ----------
   const addGame = useCallback((game) => {
@@ -505,8 +415,7 @@ export function AppProvider({ children }) {
       d.pomodoro.history.push({ id: uuid(), ...entry });
       return d;
     });
-    if (entry.phase === 'work') addXp(XP_RULES.pomodoro);
-  }, [update, addXp]);
+  }, [update]);
 
   // ---------- quick notes ----------
   const addNote = useCallback((text, color) => {
@@ -534,8 +443,7 @@ export function AppProvider({ children }) {
       else d.journal.push({ id: uuid(), date: day, mood, text, createdAt: new Date().toISOString() });
       return d;
     });
-    if (!existed) addXp(XP_RULES.journal);
-  }, [update, addXp]);
+  }, [update]);
 
   const deleteJournal = useCallback((id) => {
     update((d) => { d.journal = (d.journal || []).filter((j) => j.id !== id); return d; });
@@ -608,7 +516,7 @@ export function AppProvider({ children }) {
     update((d) => {
       if (section === 'gym') { d.tasks.gym = []; d.gymProgram = []; d.opengym = defaultOpengym(); }
       else if (section === 'programming') d.tasks.programming = [];
-      else if (section === 'german') { d.tasks.german = []; d.flashcards = []; }
+      else if (section === 'german') { d.tasks.german = []; }
       else if (section === 'gaming') { d.tasks.gaming = []; d.games = []; }
       else if (section === 'habits') d.habits = defaultHabits();
       else if (section === 'calendar') d.calendar = [];
@@ -648,15 +556,12 @@ export function AppProvider({ children }) {
     data, setData, update, today,
     searchOpen, setSearchOpen, quickAddOpen, setQuickAddOpen,
     notesOpen, setNotesOpen,
-    levelUpFlash, setLevelUpFlash, addXp,
     updateSettings,
     addDailyTask, updateDailyTask, deleteDailyTask, toggleDailyTask, addGameToToday, updateTodayGameActivity, startDailyTimer, stopDailyTimer,
     addTask, updateTask, toggleTask, deleteTask, bulkTasks, reorderTasks, addCustomTag,
     setGymProgram, updateOpengym, setOpengym,
     addHabit, updateHabit, deleteHabit, toggleHabit, setWater,
     addEvent, updateEvent, deleteEvent,
-    addCard, updateCard, deleteCard, reviewCard,
-    updateGerman, setGermanUnitDone, addGermanStudy, addGermanTestResult,
     addGame, updateGame, deleteGame,
     updatePomodoroSettings, addPomodoroHistory,
     addNote, updateNote, deleteNote,

@@ -60,7 +60,7 @@ function QuickAddModal() {
 }
 
 export default function Layout() {
-  const { setSearchOpen, setQuickAddOpen, data, completedToday, todayTasks, levelUpFlash, setLevelUpFlash } = useApp();
+  const { setSearchOpen, setQuickAddOpen, data, completedToday, todayTasks } = useApp();
   const { toggleDark } = useTheme();
   const { t } = useTranslation();
   const nav = useNavigate();
@@ -95,16 +95,6 @@ export default function Layout() {
       toast.success(t('toast.goalConfetti'), { duration: 4000 });
     }
   }, [completedToday.length, data.settings.dailyGoal, t]);
-
-  // level-up celebration
-  useEffect(() => {
-    if (!levelUpFlash) return;
-    toast.success(t('gam.levelUp', { n: levelUpFlash }), { duration: 4000, icon: '🏅' });
-    import('canvas-confetti').then(({ default: confetti }) =>
-      confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } })
-    ).catch(() => {});
-    setLevelUpFlash(null);
-  }, [levelUpFlash, setLevelUpFlash, t]);
 
   // 9 PM daily summary notification
   useEffect(() => {

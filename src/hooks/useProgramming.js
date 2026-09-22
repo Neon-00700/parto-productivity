@@ -8,7 +8,7 @@ import {
 } from '../data/programming/model';
 
 export function useProgramming() {
-  const { data, update, addXp } = useApp();
+  const { data, update } = useApp();
   const prog = data.programming || {};
 
   const mutate = useCallback((fn) => update((d) => {
@@ -91,9 +91,8 @@ export function useProgramming() {
   const addActivity = useCallback((p) => {
     const a = newActivity(p);
     mutate((pg) => { pg.activities = [a, ...(pg.activities || [])]; });
-    addXp(5);
     return a;
-  }, [mutate, addXp]);
+  }, [mutate]);
 
   const updateActivity = useCallback((id, patch) => {
     mutate((pg) => {

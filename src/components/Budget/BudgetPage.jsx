@@ -7,7 +7,7 @@ import EmptyState from '../Common/EmptyState';
 import StatsCard from '../Dashboard/StatsCard';
 import { useApp } from '../../contexts/AppContext';
 import { useTranslation } from '../../hooks/useTranslation';
-import { EXPENSE_CATEGORIES } from '../../utils/gamification';
+import { EXPENSE_CATEGORIES } from '../../utils/content';
 import { todayKey, fmtShort, localizeDigits } from '../../utils/dateUtils';
 import { format as formatJ, addMonths as addMonthsJ, startOfMonth as somJ, endOfMonth as eomJ } from 'date-fns-jalali';
 import { format as formatG, addMonths as addMonthsG, startOfMonth as somG, endOfMonth as eomG } from 'date-fns';

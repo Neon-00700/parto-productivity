@@ -10,6 +10,7 @@ import {
   FiArrowDown, FiArrowUp, FiChevronLeft, FiLayers, FiCircle, FiMap, FiCrosshair,
   FiZoomIn, FiZoomOut, FiCheckSquare, FiMoreVertical,
   FiBook, FiClipboard, FiMapPin, FiUser, FiSun, FiInfo, FiCoffee, FiAlertCircle,
+  FiEdit3, FiVolume2, FiStar, FiRefreshCw, FiChevronsRight,
 } from 'react-icons/fi';
 
 const make = (Icon) => ({ size = 18, className = '', strokeWidth = 1.75, ...props }) => (
@@ -17,6 +18,7 @@ const make = (Icon) => ({ size = 18, className = '', strokeWidth = 1.75, ...prop
 );
 
 export const ActivityIcon = make(FiActivity);
+export const TargetIcon = make(FiTarget);
 export const AwardIcon = make(FiAward);
 export const BookIcon = make(FiBookOpen);
 export const CheckIcon = make(FiCheck);
@@ -42,7 +44,6 @@ export const SettingsIcon = make(FiSettings);
 export const ShareIcon = make(FiShare2);
 export const SquareIcon = make(FiSquare);
 export const StopIcon = make(FiSquare);
-export const TargetIcon = make(FiTarget);
 export const TimerIcon = make(FiClock);
 export const TrashIcon = make(FiTrash2);
 export const TrendingIcon = make(FiTrendingUp);
@@ -71,6 +72,16 @@ export const UserIcon = make(FiUser);
 export const InfoIcon = make(FiInfo);
 export const CoffeeIcon = make(FiCoffee);
 export const AlertIcon = make(FiAlertCircle);
+
+// ---- german section ----
+export const GermanIcon = make(FiBookOpen);
+export const OverviewIcon = make(FiGrid);
+export const GrammarIcon = make(FiClipboard);
+export const VocabularyIcon = make(FiBook);
+export const TestIcon = make(FiCheckSquare);
+export const StarIcon = make(FiStar);
+export const RefreshIcon = make(FiRefreshCw);
+export const SpeakIcon = make(FiVolume2);
 
 // Section icons
 export const ProgrammingIcon = make(FiCode);
