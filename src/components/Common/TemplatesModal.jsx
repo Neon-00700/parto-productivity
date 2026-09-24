@@ -5,7 +5,7 @@ import Modal from './Modal';
 import Button from './Button';
 import { useApp } from '../../contexts/AppContext';
 import { useTranslation } from '../../hooks/useTranslation';
-import { DEFAULT_TEMPLATES } from '../../utils/gamification';
+import { DEFAULT_TEMPLATES } from '../../utils/content';
 import { localizeDigits } from '../../utils/dateUtils';
 
 export default function TemplatesModal({ open, onClose, section }) {

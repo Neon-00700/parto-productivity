@@ -20,6 +20,7 @@ import BudgetPage from './components/Budget/BudgetPage';
 import ReportsPage from './components/Reports/ReportsPage';
 import SettingsPage from './components/Settings/SettingsPage';
 import DailyTasksPage from './components/DailyTasksPage';
+import UniversityPage from './components/University/UniversityPage';
 
 export default function App() {
   return (
@@ -41,7 +42,8 @@ export default function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/today" element={<DailyTasksPage />} />
                     <Route path="/gym" element={<GymPage />} />
-                    <Route path="/programming" element={<ProgrammingPage />} />
+                    <Route path="/university" element={<UniversityPage />} />
+                    <Route path="/programming/*" element={<ProgrammingPage />} />
                     <Route path="/german" element={<GermanPage />} />
                     <Route path="/gaming" element={<GamingPage />} />
                     <Route path="/habits" element={<HabitsPage />} />

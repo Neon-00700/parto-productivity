@@ -65,9 +65,6 @@ export default function SearchModal() {
     data.games.forEach((g) => {
       if (match(g.name) || match(g.genre) || match(g.platform)) out.push({ type: 'game', label: g.name, sub: t('nav.gaming'), route: '/gaming' });
     });
-    data.flashcards.forEach((c) => {
-      if (match(c.german) || match(c.persian) || match(c.english)) out.push({ type: 'card', label: c.german, sub: t('german.flashcards'), route: '/german' });
-    });
     return out.slice(0, 30);
   }, [q, allTasks, data, t, lang]);
 

@@ -6,7 +6,6 @@ import {
 } from 'recharts';
 import Button from '../Common/Button';
 import StatsCard from '../Dashboard/StatsCard';
-import Achievements from './Achievements';
 import YearPixels from './YearPixels';
 import { useApp } from '../../contexts/AppContext';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -273,7 +272,6 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <Achievements />
       <YearPixels />
     </div>
   );

@@ -7,7 +7,7 @@ import EmptyState from '../Common/EmptyState';
 import ConfirmDialog from '../Common/ConfirmDialog';
 import { useApp } from '../../contexts/AppContext';
 import { useTranslation } from '../../hooks/useTranslation';
-import { MOODS } from '../../utils/gamification';
+import { MOODS } from '../../utils/content';
 import { todayKey, fmtDate, fmtShort, lastNDays, dateKey } from '../../utils/dateUtils';
 
 export default function JournalPage() {

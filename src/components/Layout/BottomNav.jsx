@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { FiHome, FiList, FiCheckCircle, FiClock, FiCalendar, FiMoreHorizontal, FiActivity, FiCode, FiBookOpen, FiPlay, FiBarChart2, FiSettings, FiX, FiFeather, FiDollarSign } from 'react-icons/fi';
+import { FiHome, FiList, FiCheckCircle, FiClock, FiCalendar, FiMoreHorizontal, FiActivity, FiCode, FiBook, FiBookOpen, FiPlay, FiBarChart2, FiSettings, FiX, FiFeather, FiDollarSign } from 'react-icons/fi';
 import { useTranslation } from '../../hooks/useTranslation';
 
 const MAIN = [
@@ -15,6 +15,7 @@ const MAIN = [
 const MORE = [
   { to: '/gym', key: 'gym', icon: FiActivity },
   { to: '/programming', key: 'programming', icon: FiCode },
+  { to: '/university', key: 'university', icon: FiBook },
   { to: '/german', key: 'german', icon: FiBookOpen },
   { to: '/gaming', key: 'gaming', icon: FiPlay },
   { to: '/journal', key: 'journal', icon: FiFeather },
