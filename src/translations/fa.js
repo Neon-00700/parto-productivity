@@ -1,7 +1,13 @@
+import progFa from './prog/fa.js';
+import uniFa from './uni/fa.js';
+import gerFa from './german/fa.js';
 export default {
+  ...progFa,
+  ...uniFa,
+  ...gerFa,
   app: { name: 'پرتو', tagline: 'مرکز بهره‌وری شخصی شما' },
   nav: {
-    dashboard: 'داشبورد', today: 'کارهای امروز', gym: 'باشگاه و تناسب اندام', programming: 'برنامه‌نویسی', german: 'زبان آلمانی',
+    dashboard: 'داشبورد', today: 'کارهای امروز', gym: 'باشگاه و تناسب اندام', programming: 'برنامه‌نویسی', german: 'زبان آلمانی', university: 'دانشگاه',
     gaming: 'بازی', habits: 'عادت‌ها', calendar: 'تقویم', pomodoro: 'پومودورو',
     journal: 'ژورنال', budget: 'بودجه',
     reports: 'گزارش‌ها', settings: 'تنظیمات', more: 'بیشتر',
@@ -58,15 +64,6 @@ export default {
     selectAll: 'انتخاب همه', statusTodo: 'انجام نشده', statusInProgress: 'در حال انجام', statusDone: 'انجام شده',
     archiveView: 'بایگانی', emptyArchive: 'بایگانی خالی است', markDone: 'علامت‌گذاری انجام',
     dueToday: 'موعد امروز', overdueBy: 'گذشته از موعد', restoreTask: 'کار بازگردانده شد',
-  },
-  german: {
-    study: 'کارهای مطالعه', flashcards: 'فلش‌کارت‌ها', addCard: 'افزودن فلش‌کارت', editCard: 'ویرایش فلش‌کارت',
-    german: 'کلمه / عبارت آلمانی', persian: 'معنی فارسی', english: 'معنی انگلیسی',
-    example: 'جمله نمونه', level: 'سطح', review: 'مرور', showAnswer: 'نمایش پاسخ',
-    easy: 'آسان · ۳ روز', medium: 'متوسط · فردا', hard: 'سخت · ۱ ساعت',
-    dueToday: 'برای مرور', mastered: 'تسلط', totalCards: 'کل کارت‌ها', noDue: 'کارتی برای مرور نیست. آفرین! 🎉',
-    nextCard: 'کارت بعدی', reviewDone: 'جلسه مرور تمام شد!', allCards: 'همه کارت‌ها',
-    startReview: 'شروع مرور', cardsLeft: 'کارت مانده', deleteCard: 'حذف کارت',
   },
   gaming: {
     title: 'ردیاب بازی‌ها', subtitle: 'زمان بازی و اچیومنت‌ها را برای خودت ثبت کن؛ این بخش Todo نیست.',

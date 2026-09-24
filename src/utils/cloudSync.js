@@ -16,7 +16,6 @@ function makeRow(data) {
     calendar_events: compressData(data.calendar),
     pomodoro_history: compressData(data.pomodoro?.history || []),
     pomodoro_settings: data.pomodoro?.settings || {},
-    flashcards: compressData(data.flashcards || []),
     games: compressData(data.games || []),
     german: compressData(data.german || {}),
     app_settings: {
@@ -26,7 +25,7 @@ function makeRow(data) {
       extras: compressData({
         notes: data.notes || [], journal: data.journal || [], expenses: data.expenses || [],
         bodyLog: data.bodyLog || [], templates: data.templates || [],
-        gamification: data.gamification || { xp: 0 }, frog: data.frog || {},
+        frog: data.frog || {},
       }),
     },
     updated_at: new Date().toISOString(),
@@ -63,13 +62,12 @@ export async function pullDataFromCloud(data) {
     habits: decompressData(row.habits) || base.habits,
     calendar: decompressData(row.calendar_events) || base.calendar,
     pomodoro: { settings: { ...base.pomodoro.settings, ...(row.pomodoro_settings || {}) }, history: decompressData(row.pomodoro_history) || [] },
-    flashcards: decompressData(row.flashcards) || [],
     games: decompressData(row.games) || [],
     german: decompressData(row.german) || base.german,
     customTags: cloudSettings.customTags || base.customTags,
     notes: extras?.notes || [], journal: extras?.journal || [], expenses: extras?.expenses || [],
     bodyLog: extras?.bodyLog || [], templates: extras?.templates || [],
-    gamification: extras?.gamification || { xp: 0 }, frog: extras?.frog || base.frog,
+    frog: extras?.frog || base.frog,
     settings: { ...base.settings, ...cloudSettings, supabaseUrl: data.settings.supabaseUrl, supabaseKey: data.settings.supabaseKey },
     lastSync: row.updated_at || new Date().toISOString(),
   };

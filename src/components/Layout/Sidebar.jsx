@@ -3,9 +3,8 @@ import { NavLink } from 'react-router-dom';
 import {
   FiHome, FiActivity, FiCode, FiBookOpen, FiPlay,
   FiCheckCircle, FiCalendar, FiClock, FiBarChart2, FiSettings,
-  FiFeather, FiDollarSign, FiList,
+  FiFeather, FiDollarSign, FiList, FiBook,
 } from 'react-icons/fi';
-import LevelWidget from '../Dashboard/LevelWidget';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useApp } from '../../contexts/AppContext';
 import { APP_VERSION } from '../../utils/storageUtils';
@@ -15,6 +14,7 @@ export const NAV_ITEMS = [
   { to: '/today', key: 'today', icon: FiList },
   { to: '/gym', key: 'gym', icon: FiActivity },
   { to: '/programming', key: 'programming', icon: FiCode },
+  { to: '/university', key: 'university', icon: FiBook },
   { to: '/german', key: 'german', icon: FiBookOpen },
   { to: '/gaming', key: 'gaming', icon: FiPlay },
   { to: '/habits', key: 'habits', icon: FiCheckCircle },
@@ -57,7 +57,6 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
-      <LevelWidget compact />
       <div className="px-5 py-3 text-[10px] text-slate-400 border-t border-slate-200 dark:border-slate-800">
         {t('app.name')} v{APP_VERSION}
       </div>

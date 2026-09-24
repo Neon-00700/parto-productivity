@@ -28,7 +28,6 @@ CREATE TABLE IF NOT EXISTS user_data (
   calendar_events JSONB DEFAULT '[]',
   pomodoro_history JSONB DEFAULT '[]',
   pomodoro_settings JSONB DEFAULT '{}',
-  flashcards JSONB DEFAULT '[]',
   games JSONB DEFAULT '[]',
   german JSONB DEFAULT '{}',
   app_settings JSONB DEFAULT '{}',

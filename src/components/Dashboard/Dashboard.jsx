@@ -6,7 +6,6 @@ import StatsCard from './StatsCard';
 import WeeklyChart from './WeeklyChart';
 import QuoteWidget from './QuoteWidget';
 import FrogCard from './FrogCard';
-import LevelWidget from './LevelWidget';
 import { SkeletonPage } from '../Common/Skeleton';
 import { useApp } from '../../contexts/AppContext';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -77,7 +76,6 @@ export default function Dashboard() {
       )}
 
       <div className="grid lg:grid-cols-2 gap-4">
-        <LevelWidget />
         <FrogCard />
       </div>
 

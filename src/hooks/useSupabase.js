@@ -43,7 +43,6 @@ export function useSupabase() {
         calendar_events: compressData(data.calendar),
         pomodoro_history: compressData(data.pomodoro.history),
         pomodoro_settings: data.pomodoro.settings,
-        flashcards: compressData(data.flashcards),
         games: compressData(data.games),
         german: compressData(data.german || {}),
         app_settings: {
@@ -54,7 +53,7 @@ export function useSupabase() {
           extras: compressData({
             notes: data.notes || [], journal: data.journal || [], expenses: data.expenses || [],
             bodyLog: data.bodyLog || [], templates: data.templates || [],
-            gamification: data.gamification || { xp: 0 }, frog: data.frog || {},
+            frog: data.frog || {},
           }),
         },
         updated_at: new Date().toISOString(),
@@ -98,7 +97,6 @@ export function useSupabase() {
           settings: { ...base.pomodoro.settings, ...(row.pomodoro_settings || {}) },
           history: decompressData(row.pomodoro_history) || [],
         },
-        flashcards: decompressData(row.flashcards) || [],
         games: decompressData(row.games) || [],
         german: decompressData(row.german) || base.german,
         customTags: cloudSettings.customTags || base.customTags,
@@ -107,7 +105,6 @@ export function useSupabase() {
         expenses: extras?.expenses || [],
         bodyLog: extras?.bodyLog || [],
         templates: extras?.templates || [],
-        gamification: extras?.gamification || { xp: 0 },
         frog: extras?.frog || base.frog,
         settings: {
           ...base.settings,
